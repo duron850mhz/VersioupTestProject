@@ -3,12 +3,19 @@ name: Auto Release
 on:
   push:
     tags:
-      - 'v*' # vから始まるタグ（v1.0.0など）がプッシュされたら起動
+      - 'v*'
+
+# 権限の許可を追加（これで「Resource not accessible」が治ります）
+permissions:
+  contents: write
+
+env:
+  # Node.js 24への強制移行警告を消す（2026年仕様）
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: windows-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -16,25 +23,21 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x' # .NET 10 を使用
+          dotnet-version: '10.0.x'
 
-      # 1. ビルドを実行（Release構成）
-      - name: Build
-        run: dotnet build --configuration Release
-
+      # 修正：ソリューションではなくプロジェクトファイルを直接指定して出力先を固定する
+      # ※「YourProjectName.vbproj」の部分は、自分のプロジェクトファイル名（拡張子込み）に書き換えてください！
       - name: Publish
-        run: dotnet publish --configuration Release --runtime win-x64 --self-contained false -o ./publish_output
+        run: dotnet publish VersioupTestProject.vbproj --configuration Release --runtime win-x64 --self-contained false -o ./publish_output
 
-      # 3. 成果物を一つのフォルダに集めてZipにする（PowerShellを使用）
       - name: Zip Artifacts
         run: |
           Compress-Archive -Path ./publish_output/* -DestinationPath VersioupTestProject.zip
 
-      # 4. GitHub Release を作成してZipをアップロード
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: VersioupTestProject.zip
-          generate_release_notes: true # コミットログから説明文を自動生成
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
