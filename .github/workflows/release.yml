@@ -25,10 +25,8 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # 修正：ソリューションではなくプロジェクトファイルを直接指定して出力先を固定する
-      # ※「YourProjectName.vbproj」の部分は、自分のプロジェクトファイル名（拡張子込み）に書き換えてください！
       - name: Publish
-        run: dotnet publish VersioupTestProject.vbproj --configuration Release --runtime win-x64 --self-contained false -o ./publish_output
+        run: dotnet publish **/*.vbproj --configuration Release --runtime win-x64 --self-contained false -o ./publish_output
 
       - name: Zip Artifacts
         run: |
