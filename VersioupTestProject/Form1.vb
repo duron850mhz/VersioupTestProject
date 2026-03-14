@@ -14,7 +14,7 @@ Public Class Form1
     End Sub
 
     ''' <summary>
-    ''' GitHub APIから最新リリース情報を取得して、AutoUpdater.NETのUpdateInfoEventArgsにセットする
+    ''' GitHub APIから最新リリース情報を取得して、AutoUpdater.NETのUpdateInfoEventArgsにセットする。
     ''' </summary>
     ''' <param name="args"></param>
     Private Sub GitHubApiParser(args As ParseUpdateInfoEventArgs)
