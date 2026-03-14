@@ -1,0 +1,40 @@
+name: Auto Release
+
+on:
+  push:
+    tags:
+      - 'v*' # vから始まるタグ（v1.0.0など）がプッシュされたら起動
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x' # .NET 10 を使用
+
+      # 1. ビルドを実行（Release構成）
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Publish
+        run: dotnet publish --configuration Release --runtime win-x64 --self-contained false -o ./publish_output
+
+      # 3. 成果物を一つのフォルダに集めてZipにする（PowerShellを使用）
+      - name: Zip Artifacts
+        run: |
+          Compress-Archive -Path ./publish_output/* -DestinationPath VersioupTestProject.zip
+
+      # 4. GitHub Release を作成してZipをアップロード
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: VersioupTestProject.zip
+          generate_release_notes: true # コミットログから説明文を自動生成
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
